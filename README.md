@@ -6,7 +6,7 @@ python3, chromedriver
 
 pip3 install emoji-country-flag Pillow selenium twython
 
-Mictronics dump1090: https://github.com/Mictronics/dump1090
+Mictronics readsb: https://github.com/Mictronics/readsb
 
 aircrafts.json, operators.json: http://www.mictronics.de/ -> Aircraft Database -> Export
 
