@@ -17,7 +17,7 @@ import HelperModules
 import AircraftData
 
 
-def main(sKey, sValue):
+def main():
     """
     Main module.
     """
@@ -27,41 +27,76 @@ def main(sKey, sValue):
     myOperators = []
     myAircrafts = []
     alarmFlights = {}
-    nCount = 0
+    cCount = 0
+    tCount = 0
     bFound = False
     bScreenshot = False
     sStatus = ""
-    fileName = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 
     try:
-        myLogger.debug("::: %s [Begin] :::", fileName, extra={"MHz": "[%s]" % (sKey)})
-
         previousReloadTime = time.time()
-        myBrowser = HelperModules.openBrowser(sKey, sValue[0], sValue[2])
+        myBrowser = HelperModules.openBrowser()
+
+        while myBrowser is None:
+            myLogger.debug("Reloading browser after crash")
+            myBrowser = HelperModules.openBrowser()
 
         # load operators.json and aircrafts.json once
         myOperators = HelperModules.getOperators()
         myAircrafts = HelperModules.getAircrafts()
 
         # initial aircraft.json load
-        flightData = HelperModules.loadFlightData(sKey, sValue[1])
-        currentFlights = AircraftData.FlightData.getFlights(flightData, myOperators, myAircrafts)
+        flightData = HelperModules.loadFlightData()
+        currentFlights = AircraftData.FlightData.getFlights(
+            flightData, myOperators, myAircrafts
+        )
         previousFlights = currentFlights.copy()
 
         previousTime = AircraftData.FlightData.getTime(flightData)
-        myLogger.debug("Time [%s] Current Flights [%3s]", previousTime[:-3], len(currentFlights), extra={"MHz": "[%s]" % sKey})
+        myLogger.debug(
+            "Coverage [%smi | %s%s elevation]",
+            Config.distanceAlarm,
+            Config.elevationAlarm,
+            u"\N{DEGREE SIGN}",
+        )
+        myLogger.debug(
+            "[%3s] flights @ [%s]", len(currentFlights), previousTime,
+        )
 
         while True:
-            if time.time() > previousReloadTime + 3600 and not alarmFlights:
-                myLogger.debug("Reloading browser after [1] hour", extra={"MHz": "[%s]" % sKey})
-                myBrowser.quit()
-                myBrowser = HelperModules.openBrowser(sKey, sValue[0], sValue[2])
+            if (
+                time.time() > previousReloadTime + Config.reloadTime
+                and not alarmFlights
+            ):
+                myLogger.debug(
+                    "Reloading browser after [%s] hour(s)",
+                    int(Config.reloadTime / (60 * 60)),
+                )
+
+                if not isinstance(myBrowser, (bool)):
+                    myBrowser.quit()
+
+                myBrowser = HelperModules.openBrowser()
+
+                while myBrowser is None:
+                    myLogger.debug("Reloading browser after crash")
+                    myBrowser = HelperModules.openBrowser()
+
                 previousReloadTime = time.time()
+
+                myLogger.debug(
+                    "Coverage [%smi | %s%s elevation]",
+                    Config.distanceAlarm,
+                    Config.elevationAlarm,
+                    u"\N{DEGREE SIGN}",
+                )
 
             # load aircrafts
             time.sleep(Config.sleepTime)
-            flightData = HelperModules.loadFlightData(sKey, sValue[1])
-            currentFlights = AircraftData.FlightData.getFlights(flightData, myOperators, myAircrafts)
+            flightData = HelperModules.loadFlightData()
+            currentFlights = AircraftData.FlightData.getFlights(
+                flightData, myOperators, myAircrafts
+            )
 
             # make sure you preserve aFlight in case the next json does not provide it.
             for nIndex1, aCraft1 in enumerate(currentFlights):
@@ -81,15 +116,20 @@ def main(sKey, sValue):
 
             previousTime = currentTime
 
-            nCount += 1
-            if nCount % 60 == 0:
-                myLogger.debug("Time [%s] Current Flights [%3s]", previousTime[:-3], len(currentFlights), extra={"MHz": "[%s]" % sKey})
-                nCount = 0
+            cCount += 1
+            if cCount % Config.checkEveryXTime == 0:
+                myLogger.debug(
+                    "[%3s] flights @ [%s]", len(currentFlights), previousTime,
+                )
+                cCount = 0
 
             dCurrentFlights = {}
 
             for aCraft in currentFlights:
-                if aCraft.aDistance <= Config.distanceAlarm or aCraft.aElevation >= Config.elevationAlarm:
+                if (
+                    aCraft.aDistance <= Config.distanceAlarm
+                    or aCraft.aElevation >= Config.elevationAlarm
+                ):
                     dCurrentFlights[aCraft.aHex] = aCraft
 
                     if aCraft.aHex in alarmFlights:
@@ -101,13 +141,14 @@ def main(sKey, sValue):
             lFinishedAlarms = []
             for aHex1, aCraft1 in alarmFlights.items():
                 bFound = False
+                tCount += 1
                 for aHex2, aCraft2 in dCurrentFlights.items():
                     if aHex1 == aHex2:
-                        if aCraft1[0].aDistance <= Config.distanceAlarm:
-                            myLogger.debug("[%s|%s] is [%s] miles away [%s]", aHex1, aCraft1[0].aFlight, aCraft1[0].aDistance, previousTime, extra={"MHz": "[%s]" % sKey})
-                        else:
-                            myLogger.debug("[%s|%s] is at [%s%s] elevation [%s]", aHex1, aCraft1[0].aFlight, aCraft1[0].aElevation, u"\N{DEGREE SIGN}", previousTime, extra={"MHz": "[%s]" % sKey})
-
+                        if cCount % Config.trackEveryXTime == 0:
+                            myLogger.debug(
+                                "Tracking [%s|%s]", aHex1, aCraft1[0].aFlight,
+                            )
+                            tCount = 0
                         bFound = True
                         break
 
@@ -115,28 +156,34 @@ def main(sKey, sValue):
                     if aCraft1[1] < Config.waitXUpdates:
                         alarmFlights[aHex1] = (aCraft1[0], aCraft1[1] + 1)
                     else:
-                        myLogger.debug("Taking screenshot of [%s|%s]", aHex1, aCraft1[0].aFlight, extra={"MHz": "[%s]" % sKey})
-                        if myBrowser:
-                            bScreenshot = HelperModules.getScreenshot(sKey, myBrowser, aHex1)
+                        if myBrowser is not None:
+                            bScreenshot = HelperModules.getScreenshot(myBrowser, aHex1)
 
-                        if bScreenshot:
-                            sStatus = HelperModules.formStatus(sKey, aCraft1[0], previousTime)
+                        if bScreenshot is not None:
+                            sStatus = HelperModules.formStatus(
+                                aCraft1[0], len(currentFlights), previousTime
+                            )
 
-                            tObject = threading.Thread(name="%s|%s" % (aHex1, aCraft1[0].aFlight), target=HelperModules.tweetNow, args=(sKey, "{}.png".format(aHex1), sStatus), daemon=True)
-                            myLogger.debug("Starting thread [%s] daemon [%s]", tObject.name, tObject.daemon, extra={"MHz": "[%s]" % sKey})
-                            tObject.start()
+                            HelperModules.tweetNow("%s.png" % (aHex1), sStatus)
 
                         lFinishedAlarms.append(aHex1)
 
             for aHex in lFinishedAlarms:
                 del alarmFlights[aHex]
 
-        myLogger.debug("::: %s [ End ] :::\n", fileName, extra={"MHz": "[%s]" % sKey})
-
     except Exception:
-        myLogger.debug("Exception in [file: %s | module: %s | line: %s]: %s", os.path.basename(traceback.extract_stack()[-1][0]), traceback.extract_stack()[-1][2], traceback.extract_stack()[-1][1], sys.exc_info()[1], extra={"MHz": "[%s]" % sKey})
-        myBrowser.quit()
-        return False
+        myLogger.exception(
+            "Exception in [file: %s | module: %s | line: %s]: %s",
+            os.path.basename(traceback.extract_stack()[-1][0]),
+            traceback.extract_stack()[-1][2],
+            traceback.extract_stack()[-1][1],
+            sys.exc_info()[1],
+        )
+
+        if not isinstance(myBrowser, (bool)):
+            myBrowser.quit()
+
+        return True
 
     return False
 
@@ -144,14 +191,15 @@ def main(sKey, sValue):
 if __name__ == "__main__":
 
     status = 0
-
+    tObjects = []
     myLogger = Logger.setLogger()
+    currentFile = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 
-    for sKey, sValue in Config.dURL.items():
-        tObject = threading.Thread(name="%s" % (sKey), target=main, args=(sKey, sValue), daemon=False)
-        tObject.start()
+    myLogger.debug("")
+    myLogger.debug("*** %s [Begin] ***", currentFile)
 
-    tObject.join()
+    status = main()
 
-    sys.exit(0)
+    myLogger.debug("***  %s [End]  ***", currentFile)
 
+    sys.exit(status)

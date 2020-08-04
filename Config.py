@@ -5,32 +5,33 @@ Config Module.
 __author__ = "HariA"
 
 
-dURL = {
-        "1090MHz": ("<your ip>:<your port>", "<your ip>/data/aircraft.json", 2),
-        "978MHz": ("<your ip>:<your port>", "<your ip>/data/aircraft.json", 4)
-    }
+URL = "http://192.168.xxx.xxx:8080"
+DATA = "http://192.168.xxx.xxx:8080/data/aircraft.json"
+ZOOM = 2
 
 operatorsJSON = "operators.json"
 aircraftsJSON = "aircrafts.json"
 
 chromeDriver = "/usr/bin/chromedriver"
 
-requestTimeout = 20
-distanceAlarm = 10
-elevationAlarm = 50
+requestTimeout = 20  # seconds
+distanceAlarm = 2  # miles
+elevationAlarm = 60  # degrees
 waitXUpdates = 5
-sleepTime = 1
-maxSeen = 60
+sleepTime = 1  # seconds
+checkEveryXTime = 60  # seconds
+trackEveryXTime = 10  # seconds
+reloadTime = 3600  # seconds
 
 bWindowSize = "1600,900"
 cropX = 0
 cropY = 60
 cropWidth = 1600
 cropHeight = 900
-defaultHashtags = " #AboveMonroe #ADSB #%s #RaspberryPi"
+defaultHashtags = " #AboveMonroe #ADSB"
 
 lLatitude = 0.00
-lLongitude = 0.00
+lLongitude = -0.00
 
 tConsumerKey = ""
 tConsumerSecret = ""
@@ -230,5 +231,5 @@ dCountryCodes = {
     "Viet Nam": "VN",
     "Yemen": "YE",
     "Zambia": "ZM",
-    "Zimbabwe": "ZW"
+    "Zimbabwe": "ZW",
 }

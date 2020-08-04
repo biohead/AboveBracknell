@@ -19,12 +19,32 @@ import HelperModules
 
 myLogger = logging.getLogger(Logger.sBaseFileName)
 
-class FlightData():
+
+class FlightData:
     """
     Class FlightData
     """
 
-    def __init__(self, aHex, aFlight, aAltitude, aHeading, aLatitude, aLongitude, aSpeed, aSquawk, aSeen, aDistance, aElevation, aOperator, aCountry, aCallsign, aEmergency, aFlags, aType):
+    def __init__(
+        self,
+        aHex,
+        aFlight,
+        aAltitude,
+        aHeading,
+        aLatitude,
+        aLongitude,
+        aSpeed,
+        aSquawk,
+        aSeen,
+        aDistance,
+        aElevation,
+        aOperator,
+        aCountry,
+        aCallsign,
+        aEmergency,
+        aFlags,
+        aType,
+    ):
         self.aHex = aHex
         self.aFlight = aFlight
         self.aAltitude = aAltitude
@@ -43,10 +63,26 @@ class FlightData():
         self.aFlags = aFlags
         self.aType = aType
 
-
     def __repr__(self):
-        return "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s" % (self.aHex, self.aFlight, self.aAltitude, self.aHeading, self.aLatitude, self.aLongitude, self.aSpeed, self.aSquawk, self.aSeen, self.aDistance, self.aElevation, self.aOperator, self.aCountry, self.aCallsign, self.aEmergency, self.aFlags, self.aType)
-
+        return "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s" % (
+            self.aHex,
+            self.aFlight,
+            self.aAltitude,
+            self.aHeading,
+            self.aLatitude,
+            self.aLongitude,
+            self.aSpeed,
+            self.aSquawk,
+            self.aSeen,
+            self.aDistance,
+            self.aElevation,
+            self.aOperator,
+            self.aCountry,
+            self.aCallsign,
+            self.aEmergency,
+            self.aFlags,
+            self.aType,
+        )
 
     @staticmethod
     def getFlights(flightData, myOperators, myAircrafts):
@@ -85,10 +121,18 @@ class FlightData():
 
                 if aLatitude and aLongitude:
                     if "hex" in aCraft:
-                        aHex = aCraft["hex"].strip().replace("~", "").upper() if aCraft["hex"] else None
+                        aHex = (
+                            aCraft["hex"].strip().replace("~", "").upper()
+                            if aCraft["hex"]
+                            else None
+                        )
 
                     if "flight" in aCraft:
-                        aFlight = aCraft["flight"].strip().upper() if aCraft["flight"] else None
+                        aFlight = (
+                            aCraft["flight"].strip().upper()
+                            if aCraft["flight"]
+                            else None
+                        )
 
                     if "alt_baro" in aCraft:
                         aAltitude = aCraft["alt_baro"]
@@ -98,7 +142,11 @@ class FlightData():
                         aAltitude = 0
 
                     if "track" in aCraft:
-                        aHeading = HelperModules.headingDirection(aCraft["track"]) if aCraft["track"] else None
+                        aHeading = (
+                            HelperModules.headingDirection(aCraft["track"])
+                            if aCraft["track"]
+                            else None
+                        )
 
                     if "squawk" in aCraft:
                         aSquawk = aCraft["squawk"] if aCraft["squawk"] else None
@@ -113,18 +161,25 @@ class FlightData():
                     elif "ias" in aCraft:
                         aSpeed = HelperModules.knots2mph(aCraft["ias"])
                     elif "mach" in aCraft:
-                        aSpeed = HelperModules.knots2mph(HelperModules.mach2knots(aCraft["mach"]))
+                        aSpeed = HelperModules.knots2mph(
+                            HelperModules.mach2knots(aCraft["mach"])
+                        )
                     else:
                         aSpeed = 0
 
-                    aDistance = HelperModules.distanceFromAtoB((Config.lLatitude, Config.lLongitude), (aLatitude, aLongitude))
+                    aDistance = HelperModules.distanceFromAtoB(
+                        (Config.lLatitude, Config.lLongitude), (aLatitude, aLongitude)
+                    )
 
                     if aAltitude and aDistance:
                         aElevation = HelperModules.getElevation(aAltitude, aDistance)
                     else:
                         aElevation = 0
 
-                    if "emergency" in aCraft and aCraft["emergency"] not in ("", "none"):
+                    if "emergency" in aCraft and aCraft["emergency"] not in (
+                        "",
+                        "none",
+                    ):
                         aEmergency = aCraft["emergency"]
                     else:
                         aEmergency = None
@@ -146,14 +201,35 @@ class FlightData():
 
                         if myAircrafts[aHex][1][0:4].isdigit():
                             aTypeTokens = myAircrafts[aHex][1].split()
-                            aType = "%s (%s)" % (" ".join(aTypeTokens[1:]).upper(), aTypeTokens[0])
+                            aType = "%s (%s)" % (
+                                " ".join(aTypeTokens[1:]).upper(),
+                                aTypeTokens[0],
+                            )
                         else:
                             aType = myAircrafts[aHex][1].upper()
                     else:
                         aFlags = None
                         aType = None
 
-                    aData = FlightData(aHex, aFlight, aAltitude, aHeading, aLatitude, aLongitude, aSpeed, aSquawk, aSeen, aDistance, aElevation, aOperator, aCountry, aCallsign, aEmergency, aFlags, aType)
+                    aData = FlightData(
+                        aHex,
+                        aFlight,
+                        aAltitude,
+                        aHeading,
+                        aLatitude,
+                        aLongitude,
+                        aSpeed,
+                        aSquawk,
+                        aSeen,
+                        aDistance,
+                        aElevation,
+                        aOperator,
+                        aCountry,
+                        aCallsign,
+                        aEmergency,
+                        aFlags,
+                        aType,
+                    )
 
                     myFlights.append(aData)
 
@@ -161,11 +237,16 @@ class FlightData():
             myFlights.sort(key=lambda aCraft: aCraft.aDistance)
 
         except Exception:
-            myLogger.debug("Exception in [file: %s | module: %s | line: %s]: %s", os.path.basename(traceback.extract_stack()[-1][0]), traceback.extract_stack()[-1][2], traceback.extract_stack()[-1][1], sys.exc_info()[1], extra={"MHz": ""})
-            return False
+            myLogger.exception(
+                "Exception in [file: %s | module: %s | line: %s]: %s",
+                os.path.basename(traceback.extract_stack()[-1][0]),
+                traceback.extract_stack()[-1][2],
+                traceback.extract_stack()[-1][1],
+                sys.exc_info()[1],
+            )
+            return None
 
         return myFlights
-
 
     @staticmethod
     def getTime(flightData):
@@ -174,11 +255,18 @@ class FlightData():
         """
 
         try:
-            sTime = datetime.datetime.fromtimestamp((flightData["now"])).strftime("%I:%M:%S %p")
+            sTime = datetime.datetime.fromtimestamp((flightData["now"])).strftime(
+                "%I:%M:%S %p"
+            )
 
         except Exception:
-            myLogger.debug("Exception in [file: %s | module: %s | line: %s]: %s", os.path.basename(traceback.extract_stack()[-1][0]), traceback.extract_stack()[-1][2], traceback.extract_stack()[-1][1], sys.exc_info()[1], extra={"MHz": ""})
-            return False
+            myLogger.exception(
+                "Exception in [file: %s | module: %s | line: %s]: %s",
+                os.path.basename(traceback.extract_stack()[-1][0]),
+                traceback.extract_stack()[-1][2],
+                traceback.extract_stack()[-1][1],
+                sys.exc_info()[1],
+            )
+            return None
 
         return sTime
-
