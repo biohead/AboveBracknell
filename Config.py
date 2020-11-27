@@ -28,7 +28,7 @@ cropX = 180
 cropY = 60
 cropWidth = 1400
 cropHeight = 800
-defaultHashtags = " #AboveMonroe #ADSB"
+defaultHashtags = " #AboveBracknell #Bracknell #RG12 #RG42 #ADSB"
 
 lLatitude = 51.415
 lLongitude = -0.715
