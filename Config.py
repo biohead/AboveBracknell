@@ -24,10 +24,10 @@ trackEveryXTime = 10  # seconds
 reloadTime = 3600  # seconds
 
 bWindowSize = "1600,900"
-cropX = 0
+cropX = 180
 cropY = 60
-cropWidth = 1600
-cropHeight = 900
+cropWidth = 1400
+cropHeight = 800
 defaultHashtags = " #AboveMonroe #ADSB"
 
 lLatitude = 51.415
