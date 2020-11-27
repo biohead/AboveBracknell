@@ -11,10 +11,10 @@ It tracks airplanes and then tweets whenever an airplane flies overhead.
 
 The Raspberry Pi must already be running ADS-B decoding software. Many prebuilt images of these exist.
 Preferred Option:
- * [ADSB Exchange] (https://www.adsbexchange.com/how-to-feed/adsbx-custom-pi-image/)
+ * [ADSB Exchange](https://www.adsbexchange.com/how-to-feed/adsbx-custom-pi-image/)
 Other Options:
  * [PiAware by FlightAware](https://uk.flightaware.com/adsb/piaware/build)
- * {FlightRadar24](https://www.flightradar24.com/build-your-own)
+ * [FlightRadar24](https://www.flightradar24.com/build-your-own)
 
 ## Example Tweets
 ![](https://i.imgur.com/FFYagYP.png)
@@ -26,7 +26,7 @@ Other Options:
  * RaspberryPi - 4B recommended (2B and 3B will work)
  * 16GB minimum MicroSD card
  * RTL-SDR dongle (FlightAware Pro Stick Plus) - generic RTL-SDR dongles will work
- * 1090MHz antenna (FlightAware ADS-B antenna) - ([homemade antenna guide here](https://www.adsbexchange.com/forums/topic/beginners-2-cantenna-easy-diy-antenna-to-impr$
+ * 1090MHz antenna (FlightAware ADS-B antenna) - home-made "cantenna"s will also work
 
 ## Dependencies
 * python3
@@ -37,7 +37,8 @@ Other Options:
 Also Requires:
 * aircrafts.json
 * operators.json
-Found at [Micrtronics.de](http://www.mictronics.de/)under Aircraft Database. Use the Export function on the website
+
+Both can be found at [Micrtronics.de](http://www.mictronics.de/) under Aircraft Database. Use the Export function on the website
 
 ## Install Instructions:
 * Clone the repository to the Pi
