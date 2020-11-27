@@ -10,8 +10,10 @@ It tracks airplanes and then tweets whenever an airplane flies overhead.
  * It displays the airline name and the aircraft manufacturer and type
 
 The Raspberry Pi must already be running ADS-B decoding software. Many prebuilt images of these exist.
+
 Preferred Option:
  * [ADSB Exchange](https://www.adsbexchange.com/how-to-feed/adsbx-custom-pi-image/)
+
 Other Options:
  * [PiAware by FlightAware](https://uk.flightaware.com/adsb/piaware/build)
  * [FlightRadar24](https://www.flightradar24.com/build-your-own)
