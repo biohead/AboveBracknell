@@ -5,8 +5,8 @@ Config Module.
 __author__ = "HariA"
 
 
-URL = "http://192.168.xxx.xxx:8080"
-DATA = "http://192.168.xxx.xxx:8080/data/aircraft.json"
+URL = "http://localhost/tar1090"
+DATA = "http://localhost/tar1090/data/aircraft.json"
 ZOOM = 2
 
 operatorsJSON = "operators.json"
