@@ -4,18 +4,19 @@
 # and then loops forever restarting the tracker program if it ever exits.
 
 
-cd /home/xxx/Documents/AboveMonroe
+cd /home/pi
+/AboveBracknell
 
 while :
 do
 	echo
-	echo "*** Starting [AboveMonroe] $(date) ***"
+	echo "*** Starting [AboveBracknell] $(date) ***"
 	echo
 
 	python3 AircraftTracker.py
 
 	echo
-	echo "*** [AboveMonroe] exited $(date) ***"
+	echo "*** [AboveBracknell] exited $(date) ***"
 	echo
 
 	sleep 5
