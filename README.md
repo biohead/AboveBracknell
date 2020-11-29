@@ -7,7 +7,7 @@ It tracks airplanes and then tweets whenever an airplane flies overhead.
  * It tweets an image of a map with the airplane's track.
  * It displays the flight name if available, or the reported ICAO code.
  * It displays altitude, ground speed and heading information of the airplane at it's closest point to the bot.
- * It displays the airline name and the aircraft manufacturer and type
+ * It displays the airline name and the aircraft manufacturer and type.
 
 The Raspberry Pi must already be running ADS-B decoding software. Many prebuilt images of these exist.
 
@@ -35,6 +35,7 @@ Other Options:
 * Tar1090 (For ADSB decoding)
 * Pillow, Chromedriver and Selenium (To create screenshots)
 * Twython (to tweet messages)
+* emoji-country-flag (Tweet contains flag)
 
 Also Requires:
 * aircrafts.json
@@ -46,7 +47,7 @@ Both can be found at [Micrtronics.de](http://www.mictronics.de/) under Aircraft 
 * Clone the repository to the Pi
 * Edit the Config.py file - add Twitter keys and change Lat/Lon as required
 * Transfer the aircrafts.json and operators.json files to the AboveBracknell folder.
-* Install Pillow, Selenum and Twython using pip3
+* Install Pillow, Selenum, Twython and emoji-country-flag using pip3
 * Install chromium-chromedriver using apt
 * modify Tar1090 /usr/local/share/tar1090/html/config.js file to set ICAO code to be shown by default (screenshot fails without this change)
 * run the runAircraftTracker.sh script file
