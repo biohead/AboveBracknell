@@ -31,7 +31,7 @@ cropHeight = 800
 defaultHashtags = " #AboveBracknell #Bracknell #RG12 #RG42 #ADSB"
 
 lLatitude = 51.415
-lLongitude = -0.715
+lLongitude = -0.751
 
 tConsumerKey = ""
 tConsumerSecret = ""
