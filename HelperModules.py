@@ -120,7 +120,7 @@ def distanceFromAtoB(pA, pB):
         )
         c = 2 * math.asin(math.sqrt(a))
 
-        nDistance = round(earthRadius * c, 2)
+        nDistance = round(earthRadius * c, 1)
 
     except Exception:
         myLogger.exception(
@@ -147,7 +147,7 @@ def getElevation(aAltitude, aDistance):
         if not isinstance(aDistance, (int, float, decimal.Decimal)):
             return False
 
-        nElevation = round(math.degrees(math.atan(aAltitude / (aDistance * 5280))), 2)
+        nElevation = round(math.degrees(math.atan(aAltitude / (aDistance * 5280))), 1)
 
     except Exception:
         myLogger.exception(
@@ -171,7 +171,7 @@ def knots2mph(aSpeed):
         if not isinstance(aSpeed, (int, float, decimal.Decimal)):
             return False
 
-        nSpeed = round(aSpeed * 1.15078, 2)
+        nSpeed = int(round(aSpeed * 1.15078, 0))
 
     except Exception:
         myLogger.exception(
@@ -195,7 +195,7 @@ def mach2knots(aSpeed):
         if not isinstance(aSpeed, (int, float, decimal.Decimal)):
             return False
 
-        nSpeed = round(aSpeed * 661.4708, 2)
+        nSpeed = int(round(aSpeed * 661.4708, 0))
 
     except Exception:
         myLogger.exception(
@@ -218,7 +218,7 @@ def getOperators():
     lOperators = {}
 
     try:
-        with open(Config.operatorsJSON) as oFH:
+        with open(Config.operatorsJSON, "r") as oFH:
             operatorData = json.loads(oFH.read())
 
         for sKey, sValue in operatorData.items():
@@ -246,7 +246,7 @@ def getAircrafts():
     lAircrafts = {}
 
     try:
-        with open(Config.aircraftsJSON) as aFH:
+        with open(Config.aircraftsJSON, "r") as aFH:
             aircraftsData = json.loads(aFH.read())
 
         for sKey, sValue in aircraftsData.items():
@@ -318,8 +318,10 @@ def openBrowser():
 
     try:
         chromeOptions = SO()
-        chromeOptions.add_argument("headless")
+        chromeOptions.add_argument("--headless")
+        chromeOptions.add_argument("--hide-scrollbars")
         chromeOptions.add_argument("window-size=%s" % (Config.bWindowSize))
+
         sBrowser = webdriver.Chrome(
             executable_path=Config.chromeDriver, chrome_options=chromeOptions
         )
@@ -329,6 +331,7 @@ def openBrowser():
         sBrowser.get(Config.URL)
 
         try:
+            time.sleep(Config.sleepTime)
             sElement = SW(sBrowser, Config.requestTimeout).until(
                 SC.element_to_be_clickable((BY.ID, "dump1090_version"))
             )
@@ -343,28 +346,21 @@ def openBrowser():
             )
             return None
 
-        # Zoom in
-        zoomIn = sBrowser.find_element_by_class_name("ol-zoom-in")
+        # Settings Cog
+        settingsCog = sBrowser.find_element_by_class_name("settingsContainer")
+        settingsCog.click()
+        
+        # Dim Map
+        dimMap = sBrowser.find_element_by_id("MapDim_cb")
+        dimMap.click()
 
-        for i in range(Config.ZOOM):
-            zoomIn.click()
-            time.sleep(i)
-
-        # Click on Map Legend
-        mapLegend = sBrowser.find_element_by_class_name("layer-switcher")
-        mapLegend.click()
-
-        # Click Bing Roads
-        bingRoads = sBrowser.find_element_by_xpath(
-            '//label[contains(text(), "Bing Roads")]'
-        )
-        bingRoads.click()
-
-        # Check NEXRAD
-        nexradWeather = sBrowser.find_element_by_xpath(
-            '//label[contains(text(), "NEXRAD")]'
-        )
-        nexradWeather.click()
+        # Altitude Chart
+        altitudeChart = sBrowser.find_element_by_id("altitudeChart_cb")
+        altitudeChart.click()
+        
+        # Close Settings
+        settingsCloseBox = sBrowser.find_element_by_class_name("settingsCloseBox")
+        settingsCloseBox.click()
 
         # Move cursor
         sActions = AC(sBrowser)
@@ -383,7 +379,7 @@ def openBrowser():
     return sBrowser
 
 
-def getScreenshot(sBrowser, aHex):
+def getScreenshot(sBrowser, aFlight):
     """
     Get Screenshot and crop it
     """
@@ -391,7 +387,7 @@ def getScreenshot(sBrowser, aHex):
     bScreenshot = False
 
     try:
-        clickPlane = sBrowser.find_elements_by_xpath("//td[text()='%s']" % aHex.lower())
+        clickPlane = sBrowser.find_elements_by_xpath("//td[text()='%s']" % aFlight.upper())
 
         if clickPlane:
             if len(clickPlane) >= 1:
@@ -405,23 +401,19 @@ def getScreenshot(sBrowser, aHex):
 
             time.sleep(Config.sleepTime)
 
-            # myLogger.debug(
-            #    "Taking screenshot of [%s]!", aHex}
-            # )
-
             bScreenshot = sBrowser.get_screenshot_as_png()
             bScreenshot = Image.open(BytesIO(bScreenshot))
             bScreenshot = bScreenshot.crop(
                 (Config.cropX, Config.cropY, Config.cropWidth, Config.cropHeight)
             )
-            bScreenshot.save("%s.png" % (aHex))
+            bScreenshot.save("%s.png" % (aFlight))
 
             # Show sidebar
             showSidebar = sBrowser.find_element_by_class_name("show_sidebar")
             showSidebar.click()
 
         else:
-            myLogger.exception("Cannot click on [%s]", aHex)
+            myLogger.exception("Cannot click on [%s]", aFlight)
             return None
 
     except Exception:
@@ -489,7 +481,9 @@ def formStatus(aCraft, tFlights, pTime):
                 sStatus += " #Interesting"
             elif aCraft.aFlags == "10":
                 myLogger.debug(
-                    "Military flight (Flag 10) [%s|%s]!", aCraft.aHex, aCraft.aFlight,
+                    "Military flight (Flag 10) [%s|%s]!",
+                    aCraft.aHex,
+                    aCraft.aFlight,
                 )
                 sStatus += " #Military"
             elif aCraft.aFlags == "11":
@@ -503,12 +497,16 @@ def formStatus(aCraft, tFlights, pTime):
         if aCraft.aSquawk:
             if aCraft.aSquawk == "7500":
                 myLogger.debug(
-                    "Hijack (Squawk 7500) [%s|%s]!", aCraft.aHex, aCraft.aFlight,
+                    "Hijack (Squawk 7500) [%s|%s]!",
+                    aCraft.aHex,
+                    aCraft.aFlight,
                 )
                 sStatus += " #AircraftHijacking #Squawk7500"
             elif aCraft.aSquawk == "7600":
                 myLogger.debug(
-                    "Radio Failure (Squawk 7600) [%s|%s]!", aCraft.aHex, aCraft.aFlight,
+                    "Radio Failure (Squawk 7600) [%s|%s]!",
+                    aCraft.aHex,
+                    aCraft.aFlight,
                 )
                 sStatus += " #RadioFailure #Squawk7600"
             elif aCraft.aSquawk == "7700":
