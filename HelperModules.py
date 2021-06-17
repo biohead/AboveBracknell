@@ -440,6 +440,9 @@ def formStatus(aCraft, tFlights, pTime):
         if aCraft.aCountry:
             sStatus += "%s" % (getEmoji(aCraft.aCountry))
 
+        if aCraft.aReg:
+            sStatus += " %s" % (aCraft.aReg)
+
         if aCraft.aCallsign:
             sStatus += " %s" % (aCraft.aCallsign)
 
