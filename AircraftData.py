@@ -44,6 +44,7 @@ class FlightData:
         aEmergency,
         aFlags,
         aType,
+        aReg,
     ):
         self.aHex = aHex
         self.aFlight = aFlight
@@ -62,9 +63,10 @@ class FlightData:
         self.aEmergency = aEmergency
         self.aFlags = aFlags
         self.aType = aType
+        self.aReg = aReg
 
     def __repr__(self):
-        return "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s" % (
+        return "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s" % (
             self.aHex,
             self.aFlight,
             self.aAltitude,
@@ -82,6 +84,7 @@ class FlightData:
             self.aEmergency,
             self.aFlags,
             self.aType,
+            self.aReg
         )
 
     @staticmethod
@@ -112,6 +115,7 @@ class FlightData:
                 aEmergency = None
                 aFlags = None
                 aType = None
+                aReg = None
 
                 if "lat" in aCraft:
                     aLatitude = float(aCraft["lat"]) if aCraft["lat"] else 0
@@ -207,9 +211,12 @@ class FlightData:
                             )
                         else:
                             aType = myAircrafts[aHex][1].upper()
+
+                        aReg = myAircrafts[aHex][2]
                     else:
                         aFlags = None
                         aType = None
+                        aReg = None
 
                     aData = FlightData(
                         aHex,
@@ -229,6 +236,7 @@ class FlightData:
                         aEmergency,
                         aFlags,
                         aType,
+                        aReg,
                     )
 
                     myFlights.append(aData)
