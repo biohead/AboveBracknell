@@ -41,16 +41,18 @@ Also Requires:
 * aircrafts.json
 * operators.json
 
-Both can be found at [Micrtronics.de](http://www.mictronics.de/) under Aircraft Database. Use the Export function on the website
+Both can be found at [Mictronics.de](https://www.mictronics.de/aircraft-database/export.php) under Aircraft Database. Use the Export function on the website and download the "old" database for readsb.
 
 ## Install Instructions:
 * Clone the repository to the Pi
+* Copy the Config file to Config.py
 * Edit the Config.py file - add Twitter keys and change Lat/Lon as required
 * Transfer the aircrafts.json and operators.json files to the AboveBracknell folder.
 * Install Pillow, Selenum, Twython and emoji-country-flag using pip3
 * Install chromium-chromedriver using apt
 * modify Tar1090 /usr/local/share/tar1090/html/config.js file to set ICAO code to be shown by default (screenshot fails without this change)
 * run the runAircraftTracker.sh script file
+* when working, set a crontab ```@reboot sleep 30; /home/pi/AboveBracknell/runAircraftTracker.sh```
 
 ## Modified from
 * [ha7777](https://github.com/ha7777)
@@ -59,5 +61,6 @@ Both can be found at [Micrtronics.de](http://www.mictronics.de/) under Aircraft 
 * [Kevin Brandon](https://github.com/kevinabrandon)
 * [Joseph Prochazka](https://github.com/jprochazka)
 * [ha7777](https://github.com/ha7777)
+
 
 

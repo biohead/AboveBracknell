@@ -7,7 +7,6 @@ __author__ = "HariA"
 
 import os
 import sys
-import threading
 import time
 import traceback
 
@@ -54,13 +53,15 @@ def main():
 
         previousTime = AircraftData.FlightData.getTime(flightData)
         myLogger.debug(
-            "Coverage [%smi | %s%s elevation]",
+            "Coverage [%s mi | %s%s elevation]",
             Config.distanceAlarm,
             Config.elevationAlarm,
             u"\N{DEGREE SIGN}",
         )
         myLogger.debug(
-            "[%3s] flights @ [%s]", len(currentFlights), previousTime,
+            "[%3s] flights @ [%s]",
+            len(currentFlights),
+            previousTime,
         )
 
         while True:
@@ -101,8 +102,8 @@ def main():
             # make sure you preserve aFlight in case the next json does not provide it.
             for nIndex1, aCraft1 in enumerate(currentFlights):
                 for nIndex2, aCraft2 in enumerate(previousFlights):
-                    if aCraft1.aHex == aCraft2.aHex:
-                        if not aCraft1.aFlight and aCraft2.aFlight:
+                    if aCraft1.aFlight == aCraft2.aFlight:
+                        if not aCraft1.aHex and aCraft2.aHex:
                             currentFlights[nIndex1].aFlight = aCraft2.aFlight
                             currentFlights[nIndex1].aOperator = aCraft2.aOperator
                             currentFlights[nIndex1].aCountry = aCraft2.aCountry
@@ -119,7 +120,9 @@ def main():
             cCount += 1
             if cCount % Config.checkEveryXTime == 0:
                 myLogger.debug(
-                    "[%3s] flights @ [%s]", len(currentFlights), previousTime,
+                    "[%3s] flights @ [%s]",
+                    len(currentFlights),
+                    previousTime,
                 )
                 cCount = 0
 
@@ -130,23 +133,25 @@ def main():
                     aCraft.aDistance <= Config.distanceAlarm
                     or aCraft.aElevation >= Config.elevationAlarm
                 ):
-                    dCurrentFlights[aCraft.aHex] = aCraft
+                    dCurrentFlights[aCraft.aFlight] = aCraft
 
                     if aCraft.aHex in alarmFlights:
                         if aCraft.aDistance <= alarmFlights[aCraft.aHex][0].aDistance:
-                            alarmFlights[aCraft.aHex] = (aCraft, 0)
+                            alarmFlights[aCraft.aFlight] = (aCraft, 0)
                     else:
-                        alarmFlights[aCraft.aHex] = (aCraft, 0)
+                        alarmFlights[aCraft.aFlight] = (aCraft, 0)
 
             lFinishedAlarms = []
-            for aHex1, aCraft1 in alarmFlights.items():
+            for aFlight1, aCraft1 in alarmFlights.items():
                 bFound = False
                 tCount += 1
-                for aHex2, aCraft2 in dCurrentFlights.items():
-                    if aHex1 == aHex2:
+                for aFlight2, aCraft2 in dCurrentFlights.items():
+                    if aFlight1 == aFlight2:
                         if cCount % Config.trackEveryXTime == 0:
                             myLogger.debug(
-                                "Tracking [%s|%s]", aHex1, aCraft1[0].aFlight,
+                                "Tracking [%s|%s]",
+                                aFlight1,
+                                aCraft1[0].aFlight,
                             )
                             tCount = 0
                         bFound = True
@@ -154,22 +159,22 @@ def main():
 
                 if not bFound:
                     if aCraft1[1] < Config.waitXUpdates:
-                        alarmFlights[aHex1] = (aCraft1[0], aCraft1[1] + 1)
+                        alarmFlights[aFlight1] = (aCraft1[0], aCraft1[1] + 1)
                     else:
                         if myBrowser is not None:
-                            bScreenshot = HelperModules.getScreenshot(myBrowser, aHex1)
+                            bScreenshot = HelperModules.getScreenshot(myBrowser, aFlight1)
 
                         if bScreenshot is not None:
                             sStatus = HelperModules.formStatus(
                                 aCraft1[0], len(currentFlights), previousTime
                             )
 
-                            HelperModules.tweetNow("%s.png" % (aHex1), sStatus)
+                            HelperModules.tweetNow("%s.png" % (aFlight1), sStatus)
 
-                        lFinishedAlarms.append(aHex1)
+                        lFinishedAlarms.append(aFlight1)
 
-            for aHex in lFinishedAlarms:
-                del alarmFlights[aHex]
+            for aFlight in lFinishedAlarms:
+                del alarmFlights[aFlight]
 
     except Exception:
         myLogger.exception(

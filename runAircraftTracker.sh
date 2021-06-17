@@ -3,7 +3,6 @@
 # This is just a simple script that loads the correct python enviroment
 # and then loops forever restarting the tracker program if it ever exits.
 
-
 cd /home/pi/AboveBracknell
 
 while :
@@ -15,7 +14,7 @@ do
 	python3 AircraftTracker.py
 
 	echo
-	echo "*** [AboveBracknell] exited $(date) ***"
+	echo "*** Exiting  [AboveBracknell] $(date) ***"
 	echo
 
 	sleep 5

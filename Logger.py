@@ -14,7 +14,7 @@ import traceback
 
 sBaseFileName = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 sLogFile = "%s.log" % (sBaseFileName)
-sLogDir = "Logs"
+sLogDir = "/var/log/AircraftTracker"
 
 
 def setLogger():
