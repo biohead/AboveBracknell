@@ -250,8 +250,8 @@ def getAircrafts():
             aircraftsData = json.loads(aFH.read())
 
         for sKey, sValue in aircraftsData.items():
-            if sValue["f"] and sValue["d"]:
-                lAircrafts[sKey] = (sValue["f"], sValue["d"])
+            if sValue["f"] and sValue["d"] and sValue["r"]:
+                lAircrafts[sKey] = (sValue["f"], sValue["d"], sValue["r"])
 
     except Exception:
         myLogger.exception(
