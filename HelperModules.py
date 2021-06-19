@@ -14,6 +14,7 @@ import os
 import sys
 import time
 import traceback
+#import requests
 
 from io import BytesIO
 from urllib.request import urlopen
@@ -428,7 +429,6 @@ def getScreenshot(sBrowser, aFlight):
 
     return bScreenshot
 
-
 def formStatus(aCraft, tFlights, pTime):
     """
     Form Tweet Status
@@ -442,6 +442,12 @@ def formStatus(aCraft, tFlights, pTime):
 
         if aCraft.aReg:
             sStatus += " %s" % (aCraft.aReg)
+
+        if aCraft.aOrigin:
+            sStatus += " %s" % (aCraft.aOrigin.text)
+
+        if aCraft.aDest:
+            sStatus += "%s" % (aCraft.aDest.text)
 
         if aCraft.aCallsign:
             sStatus += " %s" % (aCraft.aCallsign)

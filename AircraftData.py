@@ -15,7 +15,7 @@ import traceback
 import Config
 import Logger
 import HelperModules
-
+import requests
 
 myLogger = logging.getLogger(Logger.sBaseFileName)
 
@@ -45,6 +45,8 @@ class FlightData:
         aFlags,
         aType,
         aReg,
+        aOrigin,
+        aDest,
     ):
         self.aHex = aHex
         self.aFlight = aFlight
@@ -64,9 +66,11 @@ class FlightData:
         self.aFlags = aFlags
         self.aType = aType
         self.aReg = aReg
+        self.aOrigin = aOrigin
+        self.aDest = aDest
 
     def __repr__(self):
-        return "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s" % (
+        return "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s" % (
             self.aHex,
             self.aFlight,
             self.aAltitude,
@@ -84,7 +88,9 @@ class FlightData:
             self.aEmergency,
             self.aFlags,
             self.aType,
-            self.aReg
+            self.aReg,
+            self.aOrigin,
+            self.aDest
         )
 
     @staticmethod
@@ -116,6 +122,8 @@ class FlightData:
                 aFlags = None
                 aType = None
                 aReg = None
+                aOrigin = None
+                aDest = None
 
                 if "lat" in aCraft:
                     aLatitude = float(aCraft["lat"]) if aCraft["lat"] else 0
@@ -218,6 +226,17 @@ class FlightData:
                         aType = None
                         aReg = None
 
+                    if aFlight:
+                        aOrigin = requests.get(f"https://api.joshdouch.me/callsign-origin_IATA.php?callsign={aFlight}") #if aCraft["aOrigin"] else "fail api"
+                        #return aOrigin.text
+                    else:
+                        aOrigin = "TESTDEP"
+
+                    if aFlight:
+                        aDest = requests.get(f"https://api.joshdouch.me/callsign-des_IATA.php?callsign={aFlight}")
+                    else:
+                        aDest = "TESTARR"
+
                     aData = FlightData(
                         aHex,
                         aFlight,
@@ -237,6 +256,8 @@ class FlightData:
                         aFlags,
                         aType,
                         aReg,
+                        aOrigin,
+                        aDest,
                     )
 
                     myFlights.append(aData)
