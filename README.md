@@ -11,9 +11,9 @@ It tracks airplanes and then tweets whenever an airplane flies overhead.
  * It displays thhe flight Departure and Arrival stations using [Josh Douch's ICAO hex lookup APIs](https://api.joshdouch.me).
  * It adds conditional hashtags for aircraft departing or arriving locally at LHR.
 
-The Raspberry Pi must already be running ADS-B decoding software. Many prebuilt images of these exist.
+The Raspberry Pi must already be running ADS-B decoding software. You can build your own using READSB, or many prebuilt images of these exist.
 
-Preferred Option:
+Preferred Prebuilt Option:
  * [ADSB Exchange](https://www.adsbexchange.com/how-to-feed/adsbx-custom-pi-image/)
 
 Other Options:
