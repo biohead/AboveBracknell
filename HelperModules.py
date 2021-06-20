@@ -347,9 +347,10 @@ def openBrowser():
             return None
 
         # Settings Cog
-        settingsCog = sBrowser.find_element_by_class_name("settingsContainer")
+        # May need changing to settingsContainer on some tar1090 instances
+        settingsCog = sBrowser.find_element_by_class_name("settingsCog")
         settingsCog.click()
-        
+
         # Dim Map
         dimMap = sBrowser.find_element_by_id("MapDim_cb")
         dimMap.click()
@@ -357,7 +358,7 @@ def openBrowser():
         # Altitude Chart
         altitudeChart = sBrowser.find_element_by_id("altitudeChart_cb")
         altitudeChart.click()
-        
+
         # Close Settings
         settingsCloseBox = sBrowser.find_element_by_class_name("settingsCloseBox")
         settingsCloseBox.click()
@@ -428,7 +429,6 @@ def getScreenshot(sBrowser, aFlight):
 
     return bScreenshot
 
-
 def formStatus(aCraft, tFlights, pTime):
     """
     Form Tweet Status
@@ -452,20 +452,25 @@ def formStatus(aCraft, tFlights, pTime):
             myLogger.debug("Cannot find flight information for [%s]", aCraft.aHex)
             sStatus += " #%s" % (aCraft.aHex)
 
-        sStatus += ": %smi away [%s%s elevation]" % (
-            aCraft.aDistance,
-            aCraft.aElevation,
-            u"\N{DEGREE SIGN}",
-        )
+        if aCraft.aOrigin.text != "n/a" and aCraft.aDest.text != "n/a":
+            sStatus += " %s-%s" % (
+                aCraft.aOrigin.text,
+                aCraft.aDest.text,
+            )
 
+        if aCraft.aDistance:
+            sStatus += ": %smi away" % (aCraft.aDistance)
+        if aCraft.aHeading:
+            sStatus += " heading %s" % (aCraft.aHeading)
+        if aCraft.aSpeed:
+            sStatus += ", travelling %smph" % (aCraft.aSpeed)
         if aCraft.aAltitude:
             sStatus += " @ %sft" % (aCraft.aAltitude)
 
-        if aCraft.aHeading:
-            sStatus += ", heading %s" % (aCraft.aHeading)
-
-        if aCraft.aSpeed:
-            sStatus += " @ %smph" % (aCraft.aSpeed)
+        if aCraft.aOrigin.text == "LHR":
+            sStatus += " #Heathrow #Departure"
+        if aCraft.aDest.text == "LHR":
+            sStatus += " #Heathrow #Arrival"
 
         if aCraft.aOperator and aCraft.aType:
             sStatus += " [%s - #%s]" % (aCraft.aOperator, aCraft.aType)
@@ -524,8 +529,8 @@ def formStatus(aCraft, tFlights, pTime):
             sStatus += " #%s" % (aCraft.aEmergency)
 
         sStatus += Config.defaultHashtags
-        sStatus += " [Total Flights: %s]" % (tFlights)
-        sStatus += " @ [%s]" % (pTime)
+        sStatus += " [%s Tracked Flights" % (tFlights)
+        sStatus += " @ %s] #AboveBracknell" % (pTime)
 
     except Exception:
         myLogger.exception(
