@@ -8,7 +8,7 @@ It tracks airplanes and then tweets whenever an airplane flies overhead.
  * It displays the flight name if available, or the reported ICAO code.
  * It displays altitude, ground speed and heading information of the airplane at it's closest point to the bot.
  * It displays the airline name and the aircraft manufacturer and type.
- * It displays thhe flight Departure and Arrival stations using [Josh Douch's ICAO hex lookup APIs](https://api.joshdouch.me).
+ * It displays the flight Departure and Arrival stations using [Josh Douch's ICAO hex lookup APIs](https://api.joshdouch.me).
  * It adds conditional hashtags for aircraft departing or arriving locally at LHR.
 
 The Raspberry Pi must already be running ADS-B decoding software. You can build your own using READSB, or many prebuilt images of these exist.
