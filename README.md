@@ -21,9 +21,8 @@ Other Options:
  * [FlightRadar24](https://www.flightradar24.com/build-your-own)
 
 ## Example Tweets
-![](https://i.imgur.com/FFYagYP.png)
-![](https://i.imgur.com/xHPaVKw.png)
-![](https://i.imgur.com/bcsInS8.png)
+![](https://i.imgur.com/3lXeAgR.png)
+![](https://i.imgur.com/mKxIror.png)
 
 ## Hardware
 
