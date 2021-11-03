@@ -2,7 +2,8 @@
 Aircraft Data.
 """
 
-__author__ = "HariA"
+__author__ = "Biohead"
+__credits__ = ["HA7777", "derektgardner", "shbisson", "kevinabrandon"]
 
 
 import datetime
@@ -18,7 +19,6 @@ import HelperModules
 import requests
 
 myLogger = logging.getLogger(Logger.sBaseFileName)
-
 
 class FlightData:
     """
@@ -47,6 +47,7 @@ class FlightData:
         aReg,
         aOrigin,
         aDest,
+        aCount,
     ):
         self.aHex = aHex
         self.aFlight = aFlight
@@ -68,9 +69,10 @@ class FlightData:
         self.aReg = aReg
         self.aOrigin = aOrigin
         self.aDest = aDest
+        self.aCount = aCount
 
     def __repr__(self):
-        return "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s" % (
+        return "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s" % (
             self.aHex,
             self.aFlight,
             self.aAltitude,
@@ -90,7 +92,8 @@ class FlightData:
             self.aType,
             self.aReg,
             self.aOrigin,
-            self.aDest
+            self.aDest,
+            self.aCount
         )
 
     @staticmethod
@@ -124,6 +127,7 @@ class FlightData:
                 aReg = None
                 aOrigin = None
                 aDest = None
+                aCount = None
 
                 if "lat" in aCraft:
                     aLatitude = float(aCraft["lat"]) if aCraft["lat"] else 0
@@ -226,16 +230,38 @@ class FlightData:
                         aType = None
                         aReg = None
 
+#To investigate further: May need to place elsewhere to reduce API calls
                     if aFlight:
-                        aOrigin = requests.get(f"https://api.joshdouch.me/callsign-origin_IATA.php?callsign={aFlight}") #if aCraft["aOrigin"] else "fail api"
-                        #return aOrigin.text
+                        try:
+                            aOrigin = requests.get(f"https://api.joshdouch.me/callsign-origin_IATA.php?callsign={aFlight}") #if aCraft["aOrigin"] else "fail api"
+                        except requests.exceptions.ConnectionError:
+                            #r.status_code = "Connection error"
+                            aOrigin = "n/a"
                     else:
-                        aOrigin = "TESTDEP"
+                        aOrigin = "n/a"
 
                     if aFlight:
-                        aDest = requests.get(f"https://api.joshdouch.me/callsign-des_IATA.php?callsign={aFlight}")
+                        try:
+                            aDest = requests.get(f"https://api.joshdouch.me/callsign-des_IATA.php?callsign={aFlight}")
+                        except requests.exceptions.ConnectionError:
+                            #r.status_code = "Connection error"
+                            aDest = "n/a"
                     else:
-                        aDest = "TESTARR"
+                        aDest = "n/a"
+
+####Flightaware AeroAPIv4 test *WIP*
+# Aeroapi only uses ICAO airport codes, not IATA.
+#                    apiKey = Config.faApiKey
+#                    apiURL = 'https://aeroapi.flightaware.com/aeroapi'
+#                    ident = aFlight,
+#                    payload = {'max_pages':1}
+#                    auth_header = {'x-apikey':apiKey}
+#                    response = requests.get(apiURL + f'flights/{ident}', params=payload, headers=auth_header)
+
+#                    if response.status_code == 200:
+#                        print(response.json())
+#                    else:
+#                        print("error executing request")
 
                     aData = FlightData(
                         aHex,
@@ -258,6 +284,7 @@ class FlightData:
                         aReg,
                         aOrigin,
                         aDest,
+                        aCount,
                     )
 
                     myFlights.append(aData)
