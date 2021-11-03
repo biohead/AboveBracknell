@@ -2,8 +2,8 @@
 Helper Modules.
 """
 
-__author__ = "HariA"
-
+__author__ = "Biohead"
+__credits__ = ["HA7777", "derektgardner", "shbisson", "kevinabrandon"]
 
 import decimal
 import json
@@ -14,6 +14,7 @@ import os
 import sys
 import time
 import traceback
+import sqlite3
 
 from io import BytesIO
 from urllib.request import urlopen
@@ -310,6 +311,53 @@ def getEmoji(aCountry):
 
     return bEmoji
 
+def getCount(aHex):
+    """
+    Get seen count
+    """
+    if os.path.isfile('aircraftCount.db'):
+        #print('aircraftCount database is present')
+        conn = sqlite3.connect('aircraftCount.db')
+        c = conn.cursor()
+    else:
+        print('aircraftCount database is NOT present... creating...')
+        conn = sqlite3.connect('aircraftCount.db')
+        c = conn.cursor()
+        c.execute("CREATE TABLE aircraft ( hex text, count integer)")
+
+    aCount = ""
+        
+    #Check if aircraft has been seen. Append tweet if it has.
+    try:
+        aCount = 'placeholder'
+        c.execute("SELECT count FROM aircraft WHERE hex=:hex LIMIT 1", {'hex': aHex})
+        count = c.fetchone()
+        if count is not None:
+            count = str(count)
+            count = count[1:-2]
+            if count == 1:
+                aCount = " I've seen this aircraft 1 time before!"
+                c.execute("UPDATE aircraft SET count = count + 1 WHERE hex=:hex", {'hex': aHex})
+                conn.commit()
+            else:
+                aCount = " I've seen this aircraft " + str(count) + " times before!"
+                c.execute("UPDATE aircraft SET count = count + 1 WHERE hex=:hex", {'hex': aHex})
+                conn.commit()
+        else:
+                c.execute("INSERT INTO aircraft VALUES (?, ?)", (aHex, 1))
+                conn.commit()
+                aCount = " This is the first time I've seen this aircraft!"
+    except Exception:
+        myLogger.exception(
+            "Exception in [file: %s | module: %s | line: %s]: %s",
+            os.path.basename(traceback.extract_stack()[-1][0]),
+            traceback.extract_stack()[-1][2],
+            traceback.extract_stack()[-1][1],
+            sys.exc_info()[1],
+        )
+        return None
+
+    return aCount
 
 def openBrowser():
     """
@@ -346,22 +394,46 @@ def openBrowser():
             )
             return None
 
-        # Settings Cog
-        # May need changing to settingsContainer on some tar1090 instances
-        settingsCog = sBrowser.find_element_by_class_name("settingsCog")
-        settingsCog.click()
+        # Zoom in
+        zoomIn = sBrowser.find_element_by_class_name("ol-zoom-in")
 
-        # Dim Map
-        dimMap = sBrowser.find_element_by_id("MapDim_cb")
-        dimMap.click()
+        for i in range(Config.ZOOM):
+            zoomIn.click()
+            time.sleep(i)
+
+        # Click on Map Legend
+        mapLegend = sBrowser.find_element_by_class_name("layer-switcher")
+        mapLegend.click()
+
+        # Click Bing Roads
+        # Requires Bing API key in tar1090, otherwise comment out
+        bingRoads = sBrowser.find_element_by_xpath(
+            '//label[contains(text(), "Bing Roads")]'
+        )
+        bingRoads.click()
+
+        # Check NEXRAD
+        nexradWeather = sBrowser.find_element_by_xpath(
+            '//label[contains(text(), "NEXRAD")]'
+        )
+        nexradWeather.click()
+
+        # Settings Cog
+        # May need changing between settingsCog/settingsContainer on some tar1090 instances
+        #settingsCog = sBrowser.find_element_by_class_name("settingsContainer")
+        #settingsCog.click()
+
+        # Undim Map
+        #dimMap = sBrowser.find_element_by_id("MapDim_cb")
+        #dimMap.click()
 
         # Altitude Chart
-        altitudeChart = sBrowser.find_element_by_id("altitudeChart_cb")
-        altitudeChart.click()
+        #altitudeChart = sBrowser.find_element_by_id("altitudeChart_cb")
+        #altitudeChart.click()
 
         # Close Settings
-        settingsCloseBox = sBrowser.find_element_by_class_name("settingsCloseBox")
-        settingsCloseBox.click()
+        #settingsCloseBox = sBrowser.find_element_by_class_name("settingsCloseBox")
+        #settingsCloseBox.click()
 
         # Move cursor
         sActions = AC(sBrowser)
@@ -380,7 +452,7 @@ def openBrowser():
     return sBrowser
 
 
-def getScreenshot(sBrowser, aFlight):
+def getScreenshot(sBrowser, aHex):
     """
     Get Screenshot and crop it
     """
@@ -388,7 +460,7 @@ def getScreenshot(sBrowser, aFlight):
     bScreenshot = False
 
     try:
-        clickPlane = sBrowser.find_elements_by_xpath("//td[text()='%s']" % aFlight.upper())
+        clickPlane = sBrowser.find_elements_by_xpath("//td[text()='%s']" % aHex.lower())
 
         if clickPlane:
             if len(clickPlane) >= 1:
@@ -407,14 +479,14 @@ def getScreenshot(sBrowser, aFlight):
             bScreenshot = bScreenshot.crop(
                 (Config.cropX, Config.cropY, Config.cropWidth, Config.cropHeight)
             )
-            bScreenshot.save("%s.png" % (aFlight))
+            bScreenshot.save("%s.png" % (aHex))
 
             # Show sidebar
             showSidebar = sBrowser.find_element_by_class_name("show_sidebar")
             showSidebar.click()
 
         else:
-            myLogger.exception("Cannot click on [%s]", aFlight)
+            myLogger.exception("Cannot click on [%s]", aHex)
             return None
 
     except Exception:
@@ -444,7 +516,7 @@ def formStatus(aCraft, tFlights, pTime):
             sStatus += " %s" % (aCraft.aReg)
 
         if aCraft.aCallsign:
-            sStatus += " %s" % (aCraft.aCallsign)
+            sStatus += " #%s" % (aCraft.aCallsign)
 
         if aCraft.aFlight:
             sStatus += " #%s" % (aCraft.aFlight)
@@ -532,6 +604,10 @@ def formStatus(aCraft, tFlights, pTime):
         sStatus += " [%s Tracked Flights" % (tFlights)
         sStatus += " @ %s] #AboveBracknell" % (pTime)
 
+        if aCraft.aHex:
+            sStatus += "%s" % (getCount(aCraft.aHex))
+            
+
     except Exception:
         myLogger.exception(
             "Exception in [file: %s | module: %s | line: %s]: %s",
@@ -570,6 +646,7 @@ def tweetNow(bImage, sStatus):
 
             sResponse = tAPI.upload_media(media=bMedia)
             tAPI.update_status(status=sStatus, media_ids=[sResponse["media_id"]])
+            #print('Tweet complete')
             del tAPI
 
             myLogger.debug(
