@@ -2,8 +2,8 @@
 Aircraft Tracker.
 """
 
-__author__ = "HariA"
-
+__author__ = "Biohead"
+__credits__ = ["HA7777", "derektgardner", "shbisson", "kevinabrandon"]
 
 import os
 import sys
@@ -103,8 +103,8 @@ def main():
             # make sure you preserve aFlight in case the next json does not provide it.
             for nIndex1, aCraft1 in enumerate(currentFlights):
                 for nIndex2, aCraft2 in enumerate(previousFlights):
-                    if aCraft1.aFlight == aCraft2.aFlight:
-                        if not aCraft1.aHex and aCraft2.aHex:
+                    if aCraft1.aHex == aCraft2.aHex:
+                        if not aCraft1.aFlight and aCraft2.aFlight:
                             currentFlights[nIndex1].aFlight = aCraft2.aFlight
                             currentFlights[nIndex1].aOperator = aCraft2.aOperator
                             currentFlights[nIndex1].aCountry = aCraft2.aCountry
@@ -134,24 +134,24 @@ def main():
                     aCraft.aDistance <= Config.distanceAlarm
                     or aCraft.aElevation >= Config.elevationAlarm
                 ):
-                    dCurrentFlights[aCraft.aFlight] = aCraft
+                    dCurrentFlights[aCraft.aHex] = aCraft
 
                     if aCraft.aHex in alarmFlights:
                         if aCraft.aDistance <= alarmFlights[aCraft.aHex][0].aDistance:
-                            alarmFlights[aCraft.aFlight] = (aCraft, 0)
+                            alarmFlights[aCraft.aHex] = (aCraft, 0)
                     else:
-                        alarmFlights[aCraft.aFlight] = (aCraft, 0)
+                        alarmFlights[aCraft.aHex] = (aCraft, 0)
 
             lFinishedAlarms = []
-            for aFlight1, aCraft1 in alarmFlights.items():
+            for aHex1, aCraft1 in alarmFlights.items():
                 bFound = False
                 tCount += 1
-                for aFlight2, aCraft2 in dCurrentFlights.items():
-                    if aFlight1 == aFlight2:
+                for aHex2, aCraft2 in dCurrentFlights.items():
+                    if aHex1 == aHex2:
                         if cCount % Config.trackEveryXTime == 0:
                             myLogger.debug(
                                 "Tracking [%s|%s]",
-                                aFlight1,
+                                aHex1,
                                 aCraft1[0].aFlight,
                             )
                             tCount = 0
@@ -160,22 +160,22 @@ def main():
 
                 if not bFound:
                     if aCraft1[1] < Config.waitXUpdates:
-                        alarmFlights[aFlight1] = (aCraft1[0], aCraft1[1] + 1)
+                        alarmFlights[aHex1] = (aCraft1[0], aCraft1[1] + 1)
                     else:
                         if myBrowser is not None:
-                            bScreenshot = HelperModules.getScreenshot(myBrowser, aFlight1)
+                            bScreenshot = HelperModules.getScreenshot(myBrowser, aHex1)
 
                         if bScreenshot is not None:
                             sStatus = HelperModules.formStatus(
                                 aCraft1[0], len(currentFlights), previousTime
                             )
 
-                            HelperModules.tweetNow("%s.png" % (aFlight1), sStatus)
+                            HelperModules.tweetNow("%s.png" % (aHex1), sStatus)
 
-                        lFinishedAlarms.append(aFlight1)
+                        lFinishedAlarms.append(aHex1)
 
-            for aFlight in lFinishedAlarms:
-                del alarmFlights[aFlight]
+            for aHex in lFinishedAlarms:
+                del alarmFlights[aHex]
 
     except Exception:
         myLogger.exception(
