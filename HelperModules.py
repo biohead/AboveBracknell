@@ -335,7 +335,7 @@ def getCount(aHex):
         if count is not None:
             count = str(count)
             count = count[1:-2]
-            if count == 1:
+            if count == '1':
                 aCount = " I've seen this aircraft 1 time before!"
                 c.execute("UPDATE aircraft SET count = count + 1 WHERE hex=:hex", {'hex': aHex})
                 conn.commit()
